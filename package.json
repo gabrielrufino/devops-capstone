@@ -5,7 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "lint": "standard",
-    "test": "jest --passWithNoTests"
+    "test": "jest --passWithNoTests",
+    "start": "node src/index.js",
+    "start:dev": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
