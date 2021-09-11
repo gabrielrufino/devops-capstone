@@ -6,12 +6,14 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - run: npm ci
       - run: npm run lint
   tests:
     docker:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - run: npm ci
       - run: npm test
 
 workflows:
