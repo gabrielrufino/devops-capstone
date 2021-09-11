@@ -1,0 +1,90 @@
+version: 2.1
+
+commands:
+  destroy-environment:
+    description: Destroy cloudformation stacks given a workflow ID.
+    steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID}
+
+jobs:
+  id:
+    docker:
+      - image: alpine
+    steps:
+      - run: echo ${CIRCLE_WORKFLOW_ID}
+  lint:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm run lint
+  tests:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm test
+  scan:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run: npm audit --audit-level=critical
+  build-dockerfile:
+    machine: true
+    steps:
+      - checkout
+      - run: docker build --tag=devops-capstone .
+      - run: docker image ls
+  deploy-infra:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/infra/cluster.yml \
+              --stack-name "capstone-${CIRCLE_WORKFLOW_ID}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"
+      - run:
+          name: Save Backend url
+          command: |
+            BACKEND_URL=$(aws ec2 describe-instances --region "${AWS_DEFAULT_REGION}" --filters Name=tag:Name,Values="backend-${CIRCLE_WORKFLOW_ID}" --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "$BACKEND_URL" https://api.memstash.io/values/backend_url
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - .circleci/ansible/inventory.txt
+      - destroy-environment
+
+workflows:
+  default:
+    jobs:
+      - id
+      - lint:
+          requires:
+            - id
+      - tests:
+          requires:
+            - id
+      - scan:
+          requires:
+            - id
+      - build-dockerfile:
+          requires:
+            - lint
+            - tests
+            - scan
+      - deploy-infra:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build-dockerfile
