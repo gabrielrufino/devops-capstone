@@ -36,8 +36,6 @@ jobs:
       - checkout
       - run: npm audit --audit-level=critical
   build-dockerfile:
-    docker:
-      - image: docker
     steps:
       - checkout
       - run: docker build --tag=devops-capstone .
