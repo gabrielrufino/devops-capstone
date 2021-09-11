@@ -3,9 +3,9 @@
 const controller = (request, response, next) => {
   response.send({
     message: 'Hello, capstone!'
-  });
+  })
 
-  next();
+  next()
 }
 
 module.exports = controller

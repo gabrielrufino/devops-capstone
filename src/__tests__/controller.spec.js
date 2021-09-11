@@ -1,7 +1,8 @@
+const { describe, test, expect } = require('@jest/globals')
 const controller = require('../controller')
 
 describe('Tests for controller', () => {
-  it('Should send the correct response body', () => {
+  test('Should send the correct response body', () => {
     const request = {}
     const response = { send: jest.fn() }
     const next = jest.fn()
@@ -13,7 +14,7 @@ describe('Tests for controller', () => {
     })
   })
 
-  it('Should call the next function', () => {
+  test('Should call the next function', () => {
     const request = {}
     const response = { send: jest.fn() }
     const next = jest.fn()
