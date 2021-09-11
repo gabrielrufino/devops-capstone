@@ -3,13 +3,19 @@ version: 2
 jobs:
   lint:
     docker:
-      - image: circleci/node:14
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - run: npm run lint
   tests:
     docker:
-      - image: circleci/node:14
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - run: npm test
+
+workflows:
+  default:
+    jobs:
+      - lint
+      - tests
