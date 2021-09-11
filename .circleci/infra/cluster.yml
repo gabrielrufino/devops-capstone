@@ -17,4 +17,4 @@ Resources:
         SecurityGroupIds:
           - sg-852bb683
         SubnetIds:
-          - subnet-164b7518
+          - subnet-7a9b8f37
