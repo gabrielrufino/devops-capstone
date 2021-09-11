@@ -1,6 +1,11 @@
 version: 2.1
 
 jobs:
+  id:
+    docker:
+      - image: alpine
+    steps:
+      - echo ${CIRCLE_WORKFLOW_ID}
   lint:
     docker:
       - image: circleci/node:13.8.0
@@ -21,10 +26,48 @@ jobs:
     steps:
       - checkout
       - run: npm audit --audit-level=critical
+  deploy-infra:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/infra/capstone.yml \
+              --stack-name "capstone-${CIRCLE_WORKFLOW_ID}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"
+      - run:
+          name: Save Backend url
+          command: |
+            BACKEND_URL=$(aws ec2 describe-instances --region "${AWS_DEFAULT_REGION}" --filters Name=tag:Name,Values="backend-${CIRCLE_WORKFLOW_ID}" --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data "$BACKEND_URL" https://api.memstash.io/values/backend_url
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - .circleci/ansible/inventory.txt
+      - destroy-environment
 
 workflows:
   default:
     jobs:
-      - lint
-      - tests
-      - scan
+      - id
+      - lint:
+          requires:
+            - id
+      - tests:
+          requires:
+            - id
+      - scan:
+          requires:
+            - id
+      - deploy-infra:
+          filters:
+            branches:
+              only: main
+          requires:
+            - lint
+            - tests
+            - scan
+
