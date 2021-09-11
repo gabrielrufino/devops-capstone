@@ -6,7 +6,7 @@ Parameters:
     Type: String
 
 Resources:
-  InstanceSecurityGroup:
+  SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Sub Capstone-${ID}
@@ -21,14 +21,16 @@ Resources:
           ToPort: 3000
           CidrIp: 0.0.0.0/0
 
-  EC2Instance:
-    Type: AWS::EC2::Instance
+  EKSCluster:
+    Type: 'AWS::EKS::Cluster'
     Properties:
-      InstanceType: t2.micro
-      SecurityGroups:
-        - Ref: InstanceSecurityGroup
-      KeyName: capstone
-      ImageId: ami-068663a3c619dd892 
-      Tags:
-        - Key: Name
-          Value: !Sub backend-${ID}
+      Name: prod
+      Version: '1.14'
+      RoleArn: >-
+        arn:aws:iam::012345678910:role/eks-service-role-AWSServiceRoleForAmazonEKS-EXAMPLEBQ4PI
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - !Sub SecurityGroup
+        # SubnetIds:
+        #   - subnet-6782e71e
+        #   - subnet-e7e761ac
