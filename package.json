@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/gabrielrufino/devops-capstone/issues"
   },
-  "homepage": "https://github.com/gabrielrufino/devops-capstone#readme"
+  "homepage": "https://github.com/gabrielrufino/devops-capstone#readme",
+  "devDependencies": {
+    "jest": "^27.1.1"
+  }
 }
