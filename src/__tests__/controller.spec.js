@@ -12,4 +12,14 @@ describe('Tests for controller', () => {
       message: 'Hello, capstone!'
     })
   })
+
+  it('Should call the next function', () => {
+    const request = {}
+    const response = { send: jest.fn() }
+    const next = jest.fn()
+
+    controller(request, response, next)
+
+    expect(next).toBeCalled()
+  })
 })
