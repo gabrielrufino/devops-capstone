@@ -35,6 +35,13 @@ jobs:
     steps:
       - checkout
       - run: npm audit --audit-level=critical
+  build-dockerfile:
+    docker:
+      - image: docker
+    steps:
+      - checkout
+      - run: docker build --tag=devops-capstone .
+      - run: docker image ls
   deploy-infra:
     docker:
       - image: amazon/aws-cli
@@ -71,12 +78,14 @@ workflows:
       - scan:
           requires:
             - id
+      - build-dockerfile:
+          requires:
+            - lint
+            - tests
+            - scan
       - deploy-infra:
           filters:
             branches:
               only: main
           requires:
-            - lint
-            - tests
-            - scan
-
+            - build-dockerfile
