@@ -6,21 +6,6 @@ Parameters:
     Type: String
 
 Resources:
-  SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: !Sub Capstone-${ID}
-      GroupDescription: Allow port 22 and port 3030.
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 3000
-          ToPort: 3000
-          CidrIp: 0.0.0.0/0
-
   EKSCluster:
     Type: 'AWS::EKS::Cluster'
     Properties:
@@ -30,7 +15,6 @@ Resources:
         arn:aws:iam::012345678910:role/eks-service-role-AWSServiceRoleForAmazonEKS-EXAMPLEBQ4PI
       ResourcesVpcConfig:
         SecurityGroupIds:
-          - !Sub SecurityGroup
-        # SubnetIds:
-        #   - subnet-6782e71e
-        #   - subnet-e7e761ac
+          - sg-852bb683
+        SubnetIds:
+          - subnet-164b7518
