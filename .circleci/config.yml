@@ -27,3 +27,4 @@ workflows:
     jobs:
       - lint
       - tests
+      - scan
