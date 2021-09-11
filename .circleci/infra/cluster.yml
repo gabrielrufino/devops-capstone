@@ -25,7 +25,7 @@ Resources:
     Type: 'AWS::EKS::Cluster'
     Properties:
       Name: prod
-      Version: '1.14'
+      Version: '1.21'
       RoleArn: >-
         arn:aws:iam::012345678910:role/eks-service-role-AWSServiceRoleForAmazonEKS-EXAMPLEBQ4PI
       ResourcesVpcConfig:
