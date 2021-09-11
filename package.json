@@ -18,5 +18,8 @@
   "homepage": "https://github.com/gabrielrufino/devops-capstone#readme",
   "devDependencies": {
     "jest": "^27.1.1"
+  },
+  "dependencies": {
+    "restify": "^8.5.1"
   }
 }
