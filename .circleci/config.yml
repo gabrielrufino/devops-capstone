@@ -76,8 +76,7 @@ jobs:
           ssh-access: false
           ssh-public-key: ''
 
-workflows:circleci/kubernetes@0.12.0
-
+workflows:
   default:
     jobs:
       - id
