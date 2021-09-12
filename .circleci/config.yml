@@ -111,3 +111,6 @@ workflows:
               only: main
           requires:
             - build-dockerfile
+      - create-deployment:
+          requires:
+            - create-cluster
