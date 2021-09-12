@@ -75,6 +75,17 @@ jobs:
           nodes-max: 2
           ssh-access: false
           ssh-public-key: ''
+  create-deployment:
+    executor: aws-eks/python3
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: capstone
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: .circleci/infra/deployment.yml
+          resource-name: deployment/blue
 
 workflows:
   default:
