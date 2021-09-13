@@ -43,8 +43,11 @@ jobs:
     machine: true
     steps:
       - checkout
+      - run: echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
       - run: docker build --tag=devops-capstone .
       - run: docker image ls
+      - run: docker tag devops-capstone gabrielrufino/devops-capstone:latest
+      - run: docker push gabrielrufino/devops-capstone:latest
   create-cluster:
     executor: aws-eks/python3
     steps:
