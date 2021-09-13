@@ -90,7 +90,16 @@ jobs:
           get-rollout-status: true
           resource-file-path: .circleci/infra/deployment.yml
           resource-name: deployment/blue
-
+  smoke-test:
+    docker:
+      - image: ubuntu
+    steps:
+      - checkout
+      - run: |
+          apt udate
+          apt install curl -y
+          LB_URL=$(aws elb describe-load-balancers --load-balancer-name bluegreenlb --query "LoadBalancerDescriptions[0].DNSName" --output text)
+          curl LB_URL
 workflows:
   default:
     jobs:

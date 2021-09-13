@@ -17,5 +17,6 @@ The application is a simple API that responds to a `GET` request on the port `30
 * Scan dependencies
 * Build and publish Dockerfile
 * Create k8s cluster (Only in the main branch)
-* Create k8s service (Only in the main branch))
-* Create k8s deployment (Only in the main branch)
+* Create blue service (Only in the main branch))
+* Create blue deployment (Only in the main branch)
+* Smoke test of blue deployment (Only in the main branch)
