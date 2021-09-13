@@ -4,15 +4,6 @@ orbs:
   aws-eks: circleci/aws-eks@1.1.0
   kubernetes: circleci/kubernetes@0.12.0
 
-commands:
-  destroy-environment:
-    description: Destroy cloudformation stacks given a workflow ID.
-    steps:
-      - run:
-          name: Destroy environments
-          when: on_fail
-          command: aws cloudformation delete-stack --stack-name backend-${CIRCLE_WORKFLOW_ID}
-
 jobs:
   id:
     docker:
@@ -99,7 +90,16 @@ jobs:
           get-rollout-status: true
           resource-file-path: .circleci/infra/deployment.yml
           resource-name: deployment/blue
-
+  smoke-test:
+    docker:
+      - image: ubuntu
+    steps:
+      - checkout
+      - run: |
+          apt udate
+          apt install curl -y
+          LB_URL=$(aws elb describe-load-balancers --load-balancer-name bluegreenlb --query "LoadBalancerDescriptions[0].DNSName" --output text)
+          curl LB_URL
 workflows:
   default:
     jobs:
@@ -130,3 +130,6 @@ workflows:
       - create-deployment:
           requires:
             - create-service
+      - smoke-test:
+          requires:
+            - create-deployment
