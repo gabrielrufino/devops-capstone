@@ -75,6 +75,16 @@ jobs:
           nodes-max: 2
           ssh-access: false
           ssh-public-key: ''
+  create-service:
+    executor: aws-eks/python3
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: capstone
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          resource-file-path: .circleci/infra/service.yml
+          resource-name: service/bluegreenlb
   create-deployment:
     executor: aws-eks/python3
     steps:
@@ -111,6 +121,9 @@ workflows:
               only: main
           requires:
             - build-dockerfile
-      - create-deployment:
+      - create-service:
           requires:
             - create-cluster
+      - create-deployment:
+          requires:
+            - create-service
