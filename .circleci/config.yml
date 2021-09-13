@@ -92,7 +92,7 @@ jobs:
           resource-name: deployment/blue
   smoke-test:
     docker:
-      - image: ubuntu
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run: |
@@ -100,6 +100,15 @@ jobs:
           apt install curl -y
           LB_URL=$(aws elb describe-load-balancers --load-balancer-name bluegreenlb --query "LoadBalancerDescriptions[0].DNSName" --output text)
           curl LB_URL
+  promote:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: |
+          LB_URL=$(aws elb describe-load-balancers --load-balancer-name bluegreenlb --query "LoadBalancerDescriptions[0].DNSName" --output text)
+          echo "Promote $LB_URL to production"
+
 workflows:
   default:
     jobs:
@@ -133,3 +142,6 @@ workflows:
       - smoke-test:
           requires:
             - create-deployment
+      - promote:
+          requires:
+            - smoke-test
