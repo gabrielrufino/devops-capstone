@@ -96,8 +96,6 @@ jobs:
     steps:
       - checkout
       - run: |
-          apt udate
-          apt install curl -y
           LB_URL=$(aws elb describe-load-balancers --load-balancer-name bluegreenlb --query "LoadBalancerDescriptions[0].DNSName" --output text)
           curl LB_URL
   promote:
