@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: capstone-deployment
+  name: blue
   labels:
-    app: capstone
+    app: blue
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: capstone
+      app: blue
   template:
     metadata:
       labels:
-        app: capstone
+        app: blue
     spec:
       containers:
-      - name: capstone
-        image: gabrielrufino/capstone
-        ports:
-        - containerPort: 80
+        - name: blue
+          image: gabrielrufino/capstone
+          ports:
+            - containerPort: 3000
