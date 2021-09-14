@@ -96,7 +96,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          LB_URL=$(aws elb describe-load-balancers --load-balancer-name bluegreenlb --query "LoadBalancerDescriptions[0].DNSName" --output text)
+          LB_URL=$(aws elb describe-load-balancers --query "LoadBalancerDescriptions[0].DNSName" --output text)
           curl LB_URL
   promote:
     docker:
@@ -104,7 +104,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          LB_URL=$(aws elb describe-load-balancers --load-balancer-name bluegreenlb --query "LoadBalancerDescriptions[0].DNSName" --output text)
+          LB_URL=$(aws elb describe-load-balancers --query "LoadBalancerDescriptions[0].DNSName" --output text)
           echo "Promote $LB_URL to production"
 
 workflows:
