@@ -142,6 +142,10 @@ workflows:
           requires:
             - id
       - create-cluster:
+          requires:
+            - lint
+            - tests
+            - scan
           filters:
             branches:
               only: main
