@@ -152,7 +152,7 @@ workflows:
             - create-cluster
       - create-green-deployment:
           requires:
-            - create-service
+            - create-green-service
       - build-dockerfile:
           requires:
             - create-blue-deployment
