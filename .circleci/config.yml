@@ -30,15 +30,6 @@ jobs:
     steps:
       - checkout
       - run: npm audit --audit-level=critical
-  build-dockerfile:
-    machine: true
-    steps:
-      - checkout
-      - run: echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
-      - run: docker build --tag=devops-capstone .
-      - run: docker image ls
-      - run: docker tag devops-capstone gabrielrufino/devops-capstone:latest
-      - run: docker push gabrielrufino/devops-capstone:latest
   create-cluster:
     executor: aws-eks/python3
     steps:
@@ -69,7 +60,7 @@ jobs:
           nodes-max: 2
           ssh-access: false
           ssh-public-key: ''
-  create-service:
+  create-green-service:
     executor: aws-eks/python3
     steps:
       - checkout
@@ -77,9 +68,9 @@ jobs:
           cluster-name: capstone
           install-kubectl: true
       - kubernetes/create-or-update-resource:
-          resource-file-path: .circleci/infra/service.yml
-          resource-name: service/bluegreenlb
-  create-deployment:
+          resource-file-path: .circleci/infra/service-green.yml
+          resource-name: service/green
+  create-green-deployment:
     executor: aws-eks/python3
     steps:
       - checkout
@@ -88,7 +79,37 @@ jobs:
           install-kubectl: true
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
-          resource-file-path: .circleci/infra/deployment.yml
+          resource-file-path: .circleci/infra/deployment-green.yml
+          resource-name: deployment/green
+  build-dockerfile:
+    machine: true
+    steps:
+      - checkout
+      - run: echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+      - run: docker build --tag=devops-capstone .
+      - run: docker image ls
+      - run: docker tag devops-capstone gabrielrufino/devops-capstone:latest
+      - run: docker push gabrielrufino/devops-capstone:latest
+  create-blue-service:
+    executor: aws-eks/python3
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: capstone
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          resource-file-path: .circleci/infra/service-blue.yml
+          resource-name: service/blue
+  create-blue-deployment:
+    executor: aws-eks/python3
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: capstone
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: .circleci/infra/deployment-blue.yml
           resource-name: deployment/blue
   smoke-test:
     docker:
@@ -96,16 +117,16 @@ jobs:
     steps:
       - checkout
       - run: |
-          LB_URL=$(aws elb describe-load-balancers --query "LoadBalancerDescriptions[0].DNSName" --output text)
-          curl "$LB_URL":3000
+          BLUE_LB_URL=$(aws elb describe-load-balancers --query "LoadBalancerDescriptions[0].DNSName" --output text)
+          curl "$BLUE_LB_URL":3000
   promote:
     docker:
       - image: amazon/aws-cli
     steps:
       - checkout
       - run: |
-          LB_URL=$(aws elb describe-load-balancers --query "LoadBalancerDescriptions[0].DNSName" --output text)
-          echo "Promote $LB_URL to production"
+          BLUE_LB_URL=$(aws elb describe-load-balancers --query "LoadBalancerDescriptions[0].DNSName" --output text)
+          echo "Promote $BLUE_LB_URL to production"
 
 workflows:
   default:
@@ -120,26 +141,30 @@ workflows:
       - scan:
           requires:
             - id
-      - build-dockerfile:
-          requires:
-            - lint
-            - tests
-            - scan
       - create-cluster:
           filters:
             branches:
               only: main
           requires:
             - build-dockerfile
-      - create-service:
+      - create-green-service:
           requires:
             - create-cluster
-      - create-deployment:
+      - create-green-deployment:
           requires:
             - create-service
+      - build-dockerfile:
+          requires:
+            - create-blue-deployment
+      - create-blue-service:
+          requires:
+            - build-dockerfile
+      - create-blue-deployment:
+          requires:
+            - create-blue-service
       - smoke-test:
           requires:
-            - create-deployment
+            - create-blue-deployment
       - promote:
           requires:
             - smoke-test
