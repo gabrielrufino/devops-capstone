@@ -145,8 +145,6 @@ workflows:
           filters:
             branches:
               only: main
-          requires:
-            - build-dockerfile
       - create-green-service:
           requires:
             - create-cluster
