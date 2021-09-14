@@ -157,7 +157,7 @@ workflows:
             - create-green-service
       - build-dockerfile:
           requires:
-            - create-blue-deployment
+            - create-green-deployment
       - create-blue-service:
           requires:
             - build-dockerfile
