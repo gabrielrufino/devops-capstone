@@ -171,7 +171,7 @@ workflows:
       - scan:
           requires:
             - id
-      - create-cluster:
+      - create-green-cluster:
           requires:
             - lint
             - tests
@@ -188,9 +188,12 @@ workflows:
       - build-dockerfile:
           requires:
             - create-green-deployment
-      - create-blue-service:
+      - create-blue-cluster:
           requires:
             - build-dockerfile
+      - create-blue-service:
+          requires:
+            - create-blue-cluster
       - create-blue-deployment:
           requires:
             - create-blue-service
