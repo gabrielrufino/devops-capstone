@@ -181,7 +181,7 @@ workflows:
               only: main
       - create-green-service:
           requires:
-            - create-cluster
+            - create-green-cluster
       - create-green-deployment:
           requires:
             - create-green-service
